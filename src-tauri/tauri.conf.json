@@ -4,10 +4,9 @@
   "version": "1.0.0",
   "identifier": "com.yahei.alarmclock",
   "build": {
-    "frontendDist": "../public",
-    "devUrl": "http://localhost:1420",
-    "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build"
+    "beforeDevCommand": "",
+    "beforeBuildCommand": "",
+    "frontendDist": "../ui"
   },
   "app": {
     "windows": [
@@ -16,8 +15,8 @@
         "width": 1020,
         "height": 720,
         "resizable": true,
-        "transparent": true,
-        "decorations": false,
+        "transparent": false,
+        "decorations": true,
         "center": true
       }
     ]
