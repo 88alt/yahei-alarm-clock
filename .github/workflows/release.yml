@@ -1,10 +1,12 @@
 name: Build and Release Tauri App
 
 on:
+  # 每次推送到 main 分支自动触发（如果你不想推送自动触发，可以删掉这两行）
   push:
-    tags:
-      - 'v*'
-  workflow_dispatch:
+    branches:
+      - main 
+  # 支持在 Actions 页面手动点击按钮触发
+  workflow_dispatch: 
 
 jobs:
   release:
@@ -15,8 +17,6 @@ jobs:
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: 安装 Node.js
         uses: actions/setup-node@v4
@@ -29,11 +29,11 @@ jobs:
       - name: 安装依赖
         run: npm install
 
-      - name: 编译
+      - name: 编译 Tauri 应用
         run: npm run tauri build
 
       - name: 删除旧 Release
-        continue-on-error: true
+        continue-on-error: true # 即使是第一次运行（没有旧版本可删），也不会报错中断
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release delete v1.0.0 --yes --cleanup-tag
@@ -43,7 +43,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create v1.0.0 `
-            --title "极简雅黑桌面闹钟 v1.0.0" `
+            --title "极简雅黑桌面闹钟 (最新版)" `
             --notes "由 GitHub Actions 自动构建的最新 Windows 桌面版本。" `
-            src-tauri/target/release/bundle/nsis/YaheiAlarmClock_1.0.0_x64-setup.exe `
-            src-tauri/target/release/bundle/msi/YaheiAlarmClock_1.0.0_x64_en-US.msi
+            src-tauri/target/release/bundle/nsis/*.exe `
+            src-tauri/target/release/bundle/msi/*.msi
