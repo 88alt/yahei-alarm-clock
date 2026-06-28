@@ -1,7 +1,7 @@
 name: Build and Release Tauri App
 
 on:
-  # 每次推送到 main 分支自动触发（如果你不想推送自动触发，可以删掉这两行）
+  # 每次推送到 main 分支自动触发
   push:
     branches:
       - main 
@@ -33,17 +33,16 @@ jobs:
         run: npm run tauri build
 
       - name: 删除旧 Release
-        continue-on-error: true # 即使是第一次运行（没有旧版本可删），也不会报错中断
+        continue-on-error: true # 即使是第一次运行没有旧版本，也不会报错中断
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release delete v1.0.0 --yes --cleanup-tag
 
-      - name: 创建 Release 并上传文件
+      - name: 创建 Release 并上传单文件绿色版
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create v1.0.0 `
-            --title "极简雅黑桌面闹钟 (最新版)" `
-            --notes "由 GitHub Actions 自动构建的最新 Windows 桌面版本。" `
-            src-tauri/target/release/bundle/nsis/*.exe `
-            src-tauri/target/release/bundle/msi/*.msi
+            --title "极简雅黑桌面闹钟 (绿色单文件版)" `
+            --notes "由 GitHub Actions 自动构建的免安装纯净版本，双击即开。" `
+            src-tauri/target/release/yahei-alarm-clock.exe
