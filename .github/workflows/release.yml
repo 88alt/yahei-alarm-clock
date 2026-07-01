@@ -1,7 +1,6 @@
 name: Build and Release Tauri App
 
 on:
-  # 仅保留手动触发，彻底关闭代码推送时的自动编译
   workflow_dispatch:
 
 jobs:
@@ -9,7 +8,6 @@ jobs:
     permissions:
       contents: write
     runs-on: windows-latest
-
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
@@ -25,15 +23,27 @@ jobs:
       - name: 安装依赖
         run: npm install
 
-      - name: 编译 Tauri 应用
+      # === 构建离线版（保留现有 ui 文件夹）===
+      - name: 编译离线版（带 ui 文件夹）
         run: npm run tauri build
 
-      - name: 打包绿色版 zip
+      # === 构建单文件在线版（使用 index2.html）===
+      - name: 编译单文件绿色版（index2.html）
+        run: |
+          npm run tauri build -- --config "{\"build\":{\"frontendDist\":\"../index2.html\"}}"
+
+      # === 打包绿色便携版（单文件）===
+      - name: 打包单文件绿色版 zip
+        run: |
+          Compress-Archive -Path "src-tauri/target/release/yahei-alarm-clock.exe" -DestinationPath YaheiAlarmClock-SingleFile-Portable.zip -Force
+
+      # === 打包离线版（可选，保持原有）===
+      - name: 打包离线绿色版 zip
         run: |
           New-Item -ItemType Directory -Force -Path portable
           Copy-Item src-tauri\target\release\yahei-alarm-clock.exe portable\
-          Copy-Item ui -Destination portable\ui -Recurse
-          Compress-Archive -Path portable\* -DestinationPath YaheiAlarmClock-portable.zip -Force
+          Copy-Item ui -Destination portable\ui -Recurse -Force
+          Compress-Archive -Path portable\* -DestinationPath YaheiAlarmClock-OffLine-Portable.zip -Force
 
       - name: 删除旧 Release
         continue-on-error: true
@@ -47,7 +57,8 @@ jobs:
         run: |
           gh release create v1.0.0 `
             --title "极简雅黑桌面闹钟 v1.0.0" `
-            --notes "由 GitHub Actions 自动构建的最新 Windows 桌面版本。" `
+            --notes "离线完整版（带 ui 文件夹） + 单文件绿色便携版（在线资源）" `
             src-tauri/target/release/bundle/nsis/*.exe `
             src-tauri/target/release/bundle/msi/*.msi `
-            YaheiAlarmClock-portable.zip
+            YaheiAlarmClock-SingleFile-Portable.zip `
+            YaheiAlarmClock-OffLine-Portable.zip
