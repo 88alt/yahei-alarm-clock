@@ -30,7 +30,8 @@ jobs:
       # === 构建单文件在线版（使用 index2.html）===
       - name: 编译单文件绿色版（index2.html）
         run: |
-          npm run tauri build -- --config "{\"build\":{\"frontendDist\":\"../index2.html\"}}"
+          $config = '{"build":{"frontendDist":"../index2.html"}}'
+          npm run tauri build -- --config $config
 
       # === 打包绿色便携版（单文件）===
       - name: 打包单文件绿色版 zip
